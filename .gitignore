@@ -1,4 +1,14 @@
 .env
-Final Year Project Memory/*.md
-Final Year Project Memory/.obsidian/*.json
-Final Year Project Memory/.obsidian
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+node_modules/
+dist/
+dist-electron/
+release/
+.DS_Store
+Thumbs.db
+Final Year Project Memory/.obsidian/
+graphify-out/

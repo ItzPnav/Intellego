@@ -196,7 +196,95 @@ If it doesn't match the commit the graph was last built from, run `graphify upda
 
 ---
 
-## 10. OBSIDIAN VAULT — ONGOING MAINTENANCE
+## 10. UI DESIGN SYSTEM — MANDATORY, NO DEVIATION
+
+`app/` (the Electron/React renderer) must visually match the two systems defined below, which together are a mix distilled from two internal reference builds. These are not moodboards — the tokens and rules below are the literal spec. Copy tokens, class names, and structural patterns exactly as written in this section. Do not invent new colors, radii, fonts, or spacing values. If a component isn't covered here, derive its values from the closest analog already defined below rather than improvising — and never by opening, searching for, or reading any external/original reference HTML file. Nothing outside this document should ever be consulted for styling.
+
+There are **two locked style systems** in this project, used for different surfaces. Never blend their tokens together on the same surface, and never substitute one where the other is specified.
+
+### 10.1 System A — "App Shell" (chat, sidebar, all primary app UI)
+
+This governs the main Electron window: sidebar, chat/messages, top header, input bar, toasts, modals, settings. The tokens and rules below are self-contained — this section is a mix distilled from two internal reference builds, one of which contributed these visual tokens. Do not search for, open, or read any external/original reference HTML file for this — everything needed is already written out below.
+
+**Tokens (copy verbatim as CSS custom properties):**
+```css
+:root {
+  --color-bg: #1a1a1a;
+  --color-sidebar: #161616;
+  --color-surface: #212121;
+  --color-surface-2: #2a2a2a;
+  --color-surface-3: #333333;
+  --color-border: #2a2a2a;
+  --color-border-light: #333333;
+  --color-text: #ececec;
+  --color-text-dim: #8e8e8e;
+  --color-text-muted: #666666;
+  --color-accent: #d97757;
+  --color-accent-glow: rgba(217,119,87,0.15);
+  --color-focus: rgba(217,119,87,0.5);
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --sidebar-w: 260px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --transition-sidebar: 250ms cubic-bezier(0.16,1,0.3,1);
+}
+```
+
+**Hard rules:**
+1. Base font size is `14px`, body line-height `1.6`, font family `var(--font-body)`. Headings/greetings/display text use `var(--font-display)` ('Instrument Serif') — never use the display font for body copy or vice versa.
+2. All interactive surfaces (buttons, nav items, pills) use the surface ladder in order on hover/active: `--color-surface` → `--color-surface-2` → `--color-surface-3`. Never skip a rung (e.g. never jump straight from base to `--color-surface-3` on hover).
+3. Radii are semantic, not arbitrary: `--radius-sm` (6px) for icon buttons/nav items, `--radius-md` (10px) for pills/panels/code blocks, `--radius-lg` (16px) reserved, `--radius-xl` (20px) for the input wrapper only.
+4. Accent color (`--color-accent`, `#d97757`) is used ONLY for: primary send button, active/selected states, links inside AI text, and focus glow. Never use accent as a background fill for large surfaces or body text color.
+5. Buttons: `cursor: pointer; border: none; background: none; color: inherit; font: inherit;` as the reset baseline — every custom button builds up from this, never from browser defaults.
+6. Scrollbars are always thin (`4–6px`) and styled with `--color-surface-3` thumbs, no visible track — apply this to every scrollable region (sidebar recents, messages, textarea, code blocks).
+7. Transitions on interactive elements are `150ms` for color/background, `200ms` for focus rings, `250ms cubic-bezier(0.16,1,0.3,1)` for the sidebar collapse/expand only. Do not invent other easing curves.
+8. Message bubbles: user messages are right-aligned pills (`border-radius: 18px 18px 4px 18px`, `--color-surface-2` background, max-width 75%). AI messages are left-aligned, full-width text (no bubble), with a small circular avatar (`28px`, `--color-surface-2` bg, accent-colored icon).
+9. Code blocks inside AI text: `--color-surface-2` background, `1px solid var(--color-border-light)`, `--radius-md`, monospace `13px`, language label top-right in `--color-text-muted`.
+10. Toasts: fixed bottom-right, `--color-surface-3` background, `--radius-md`, slide-in from the right (`translateX(20px) → 0`, 300ms), auto-dismiss after 4s.
+11. Mobile breakpoint is `640px`: sidebar becomes an off-canvas drawer (`translateX(-100%)` when closed) with a `rgba(0,0,0,0.55)` overlay — do not use a different breakpoint or overlay opacity.
+12. Icons are inline SVG, `stroke="currentColor"`, `stroke-width` of `1.8–2.5` depending on weight needed, `stroke-linecap="round"` — never use filled icon sets or an icon font here.
+
+### 10.2 System B — "Document/Artifact Surfaces" (diff previews, graph explorer panels, exported reports, any print-like or archival view)
+
+This governs surfaces that are conceptually a physical artifact the user is inspecting or producing — e.g. the diff-preview viewer, the Semantic Knowledge Graph explorer/report panel, exported docs — anything that should feel like a printed/zine artifact rather than a live chat. The tokens and rules below are self-contained — this section is the other half of the mix distilled from the two internal reference builds. Do not search for, open, or read any external/original reference HTML file for this — everything needed is already written out below.
+
+**Tokens (copy verbatim as CSS custom properties):**
+```css
+:root {
+  --ink: #161311;
+  --paper: #f2ede2;
+  --paper-dim: #e6ded0;
+  --line: #161311;
+  --accent: #d4432c;
+  --accent-ink: #fff6ec;
+  --panel: #fbf8f0;
+  --muted: #847c6c;
+}
+```
+
+**Hard rules:**
+1. Font family is `'Courier New', ui-monospace, monospace` for ALL text on these surfaces except section titles, which use `Georgia, 'Times New Roman', serif` with `font-weight: 900; font-style: italic; text-transform: uppercase;`. Never use `--font-body`/`--font-display` from System A here.
+2. Every bordered element uses a **solid 2–3px `var(--ink)` border** — never a soft/rgba border, never a box-shadow-only edge. Panels additionally carry a hard offset shadow: `box-shadow: 6px 6px 0 var(--ink);` (no blur, no spread).
+3. No border-radius anywhere in System B. Every corner is square. This is a strict inversion of System A's rounded-corner language and must never be softened.
+4. Buttons: solid `var(--ink)` fill with `var(--paper)` text and a `3px solid var(--ink)` border by default; hover swaps fill/border to `var(--accent)`. Secondary buttons invert (paper fill, ink text) and swap to ink-fill on hover.
+5. Uppercase + letter-spacing (`1–2px`) on all button labels, tab labels, and badges. Body copy stays lowercase/sentence case.
+6. The accent color here (`#d4432c`, a red — distinct from System A's `#d97757` orange) marks: active tab state is inverted to solid ink instead; badges, trigger tags, and highlighted labels use the red accent with `--accent-ink` text.
+7. Drop-zones / file-input areas: `3px dashed var(--muted)` border, `var(--paper)` background, switching to `var(--accent)` dashed border + light red tint background only while actively dragging a file over them.
+8. Never introduce shadows other than the flat offset shadow in rule 2 — no blurred/soft shadows anywhere in System B.
+
+### 10.3 Cross-system rules
+
+- These two token sets must never appear in the same stylesheet scope without a namespacing wrapper (e.g. `.app-shell { ... }` vs `.doc-surface { ... }`) — a component must fully commit to one system, not cherry-pick tokens from both.
+- If a new surface doesn't clearly belong to either category, default to System A (it's the primary app shell language) and flag the ambiguity back to the user rather than guessing.
+- Both systems' color tokens must stay as CSS custom properties (`:root` or scoped) — never hardcode hex values inline in components; always reference the variable.
+- Any new component added to `app/` must be checked against this section before being considered complete. A component that introduces an undocumented color, radius, font, or shadow value is a spec violation, not a stylistic choice.
+
+---
+
+## 11. OBSIDIAN VAULT — ONGOING MAINTENANCE
 
 Initial creation happens once, automatically, per Section 0.2. After that:
 
