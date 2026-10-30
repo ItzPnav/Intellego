@@ -10,6 +10,8 @@
 <img src="https://img.shields.io/badge/LLM-NVIDIA%20Nemotron-76B900?style=for-the-badge">
 </div>
 
+> **Quick Start (Windows):** Run `setup.bat`. The script checks your environment, builds your virtual environment, and installs every dependency. Your setup finishes in one step.
+
 ---
 
 # <img src="https://raw.githubusercontent.com/tabler/tabler-icons/main/icons/outline/info-circle.svg" width="22" height="22" align="center"/> **Overview**
